@@ -4,101 +4,125 @@
 
 {% block content %}
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
-  <h1 style="font-size:1.4rem;">Órdenes de Transporte</h1>
-  <a href="{{ url_for('new_order') }}" class="btn btn-primary">+ Nueva Orden</a>
+<div class="page-top">
+  <div>
+    <div class="page-title">Órdenes de servicio</div>
+    <div class="page-sub">Gestión operativa &mdash; Variante Mamonal</div>
+  </div>
 </div>
 
-{# ── Filtro por estado ──────────────────────────────────────────────── #}
-<div style="margin-bottom:1.25rem;">
+{# ── Tarjetas de resumen por estado ── #}
+<div class="stats">
+  {% set counts = {'Pendiente': 0, 'En ruta': 0, 'Entregado': 0, 'Cancelado': 0} %}
+  {% for o in orders %}
+    {% if o.status in counts %}
+      {% set _ = counts.update({o.status: counts[o.status] + 1}) %}
+    {% endif %}
+  {% endfor %}
+  <div class="stat-card s-pend">
+    <div class="stat-num">{{ counts['Pendiente'] }}</div>
+    <div class="stat-label">Pendientes</div>
+  </div>
+  <div class="stat-card s-ruta">
+    <div class="stat-num">{{ counts['En ruta'] }}</div>
+    <div class="stat-label">En ruta</div>
+  </div>
+  <div class="stat-card s-entr">
+    <div class="stat-num">{{ counts['Entregado'] }}</div>
+    <div class="stat-label">Entregadas</div>
+  </div>
+  <div class="stat-card s-canc">
+    <div class="stat-num">{{ counts['Cancelado'] }}</div>
+    <div class="stat-label">Canceladas</div>
+  </div>
+</div>
+
+{# ── Filtros por estado ── #}
+<div class="filters">
+  <span class="filter-label">Estado:</span>
   <a href="{{ url_for('index') }}"
-     class="btn {{ 'btn-primary' if not current_filter else 'btn-warning' }}"
-     style="margin-right:.4rem;">
+     class="filter-btn {{ 'active' if not current_filter else '' }}">
     Todos
   </a>
   {% for status in statuses %}
     <a href="{{ url_for('index', status=status) }}"
-       class="btn {{ 'btn-primary' if current_filter == status else 'btn-warning' }}"
-       style="margin-right:.4rem;">
+       class="filter-btn {{ 'active' if current_filter == status else '' }}">
       {{ status }}
     </a>
   {% endfor %}
 </div>
 
-{# ── Tabla de órdenes ───────────────────────────────────────────────── #}
+{# ── Tabla de órdenes ── #}
 {% if orders %}
-<table>
-  <thead>
-    <tr>
-      <th>Cliente</th>
-      <th>Conductor</th>
-      <th>Fecha</th>
-      <th>Estado</th>
-      <th>Observaciones</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for order in orders %}
-    <tr>
-      <td>{{ order.client_name }}</td>
-      <td>{{ order.driver_name }}</td>
-      <td>{{ order.order_date }}</td>
-      <td>
-        {% set badge_map = {
-          'Pendiente': 'badge-pendiente',
-          'En ruta':   'badge-en-ruta',
-          'Entregado': 'badge-entregado',
-          'Cancelado': 'badge-cancelado'
-        } %}
-        <span class="badge {{ badge_map.get(order.status, '') }}">
-          {{ order.status }}
-        </span>
-      </td>
-      <td>{{ order.observations or '—' }}</td>
-      <td style="white-space:nowrap;">
-
-        {# Editar — solo si no está Entregado ni Cancelado #}
-        {% if order.status not in ['Entregado', 'Cancelado'] %}
-          <a href="{{ url_for('edit_order', order_id=order.id) }}"
-             class="btn btn-warning"
-             style="margin-right:.3rem;">
-            Editar
-          </a>
-        {% endif %}
-
-        {# Cancelar — solo si no está ya Cancelado ni Entregado #}
-        {% if order.status not in ['Entregado', 'Cancelado'] %}
-          <form method="POST"
-                action="{{ url_for('cancel_order', order_id=order.id) }}"
-                style="display:inline;"
-                onsubmit="return confirm('¿Cancelar la orden de {{ order.client_name }}?');">
-            <button type="submit" class="btn btn-danger">Cancelar</button>
-          </form>
-        {% endif %}
-
-        {# Sin acciones disponibles #}
-        {% if order.status in ['Entregado', 'Cancelado'] %}
-          <span style="color:#999; font-size:.85rem;">Sin acciones</span>
-        {% endif %}
-
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-wrap">
+  <div class="table-toolbar">
+    <span class="table-count">
+      <strong>{{ orders|length }}</strong>
+      orden{{ 'es' if orders|length != 1 else '' }} encontrada{{ 's' if orders|length != 1 else '' }}
+    </span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Cliente</th>
+        <th>Conductor</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Observaciones</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      {% set badge_map = {
+        'Pendiente': 'badge-pendiente',
+        'En ruta':   'badge-en-ruta',
+        'Entregado': 'badge-entregado',
+        'Cancelado': 'badge-cancelado'
+      } %}
+      <tr>
+        <td class="td-id">ORD-{{ order.id }}</td>
+        <td class="td-client">{{ order.client_name }}</td>
+        <td class="td-driver">{{ order.driver_name }}</td>
+        <td class="td-date">{{ order.order_date }}</td>
+        <td>
+          <span class="badge {{ badge_map.get(order.status, '') }}">
+            {{ order.status }}
+          </span>
+        </td>
+        <td class="td-obs">{{ order.observations or '—' }}</td>
+        <td class="actions">
+          {% if order.status not in ['Entregado', 'Cancelado'] %}
+            <a href="{{ url_for('edit_order', order_id=order.id) }}"
+               class="btn-action btn-edit">Editar</a>
+            <form method="POST"
+                  action="{{ url_for('cancel_order', order_id=order.id) }}"
+                  style="display:inline;"
+                  onsubmit="return confirm('¿Cancelar la orden de {{ order.client_name }}?');">
+              <button type="submit" class="btn-action btn-cancel">Cancelar</button>
+            </form>
+          {% else %}
+            <span class="no-action">Sin acciones</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% else %}
-<div class="card" style="text-align:center; padding:3rem; color:#666;">
-  <p style="font-size:1.1rem;">
+<div class="empty-state">
+  <p>
     {% if current_filter %}
       No hay órdenes con estado <strong>{{ current_filter }}</strong>.
     {% else %}
       No hay órdenes registradas todavía.
     {% endif %}
   </p>
-  <a href="{{ url_for('new_order') }}" class="btn btn-primary" style="margin-top:1rem;">
-    Crear primera orden
+  <a href="{{ url_for('new_order') }}" class="btn-nav" style="margin-top:1rem;display:inline-flex;">
+    + Crear primera orden
   </a>
 </div>
 {% endif %}

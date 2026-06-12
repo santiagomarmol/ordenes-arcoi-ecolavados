@@ -4,99 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Gestor de Órdenes{% endblock %}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
-
-    nav {
-      background: #1a1a2e;
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-    }
-    nav a { color: #ccc; text-decoration: none; }
-    nav a:hover { color: white; }
-    nav .brand { font-weight: bold; font-size: 1.1rem; color: white; }
-
-    main {
-      max-width: 960px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    /* Flash messages */
-    .flash { padding: .75rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
-    .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .flash.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-    /* Botones */
-    .btn {
-      display: inline-block;
-      padding: .45rem .9rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: .9rem;
-      text-decoration: none;
-    }
-    .btn-primary  { background: #1a1a2e; color: white; }
-    .btn-warning  { background: #e0a800; color: #222; }
-    .btn-danger   { background: #c0392b; color: white; }
-    .btn:hover    { opacity: .85; }
-
-    /* Tabla */
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { padding: .65rem 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #1a1a2e; color: white; }
-    tr:hover { background: #f0f0f0; }
-
-    /* Badges de estado */
-    .badge {
-      padding: .2rem .6rem;
-      border-radius: 12px;
-      font-size: .8rem;
-      font-weight: 600;
-    }
-    .badge-pendiente  { background: #fff3cd; color: #856404; }
-    .badge-en-ruta    { background: #cce5ff; color: #004085; }
-    .badge-entregado  { background: #d4edda; color: #155724; }
-    .badge-cancelado  { background: #e2e3e5; color: #383d41; }
-
-    /* Formulario */
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: .3rem; font-weight: 500; }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: .5rem .75rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-
-    .card {
-      background: white;
-      border-radius: 6px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,.1);
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
 <nav>
-  <span class="brand">🚚 Órdenes de Transporte</span>
-  <a href="{{ url_for('index') }}">Listado</a>
-  <a href="{{ url_for('new_order') }}">+ Nueva Orden</a>
+  <div class="brand">
+    <div class="brand-icon">🚛</div>
+    <div>
+      <div class="brand-text">Arcoi</div>
+      <div class="brand-sub">Ecolavados SAS</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+       href="{{ url_for('index') }}">
+      Órdenes
+    </a>
+    <a class="nav-link {% if request.endpoint == 'new_order' %}active{% endif %}"
+       href="{{ url_for('new_order') }}">
+      + Nueva orden
+    </a>
+  </div>
+  <div class="nav-cta">
+    <a class="btn-nav" href="{{ url_for('new_order') }}">+ Nueva orden</a>
+  </div>
 </nav>
 
 <main>
@@ -112,6 +47,10 @@
   {% block content %}{% endblock %}
 
 </main>
+
+<footer>
+  <p>Arcoi SAS / Ecolavados SAS &mdash; Sistema interno de órdenes de servicio &mdash; Variante Mamonal</p>
+</footer>
 
 </body>
 </html>
