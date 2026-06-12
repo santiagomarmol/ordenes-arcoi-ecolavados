@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar Orden' if order else 'Nueva Orden' }}{% endblock %}
+
+{% block content %}
+
+<div style="max-width:560px; margin:0 auto;">
+
+  <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+    <a href="{{ url_for('index') }}" style="color:#666; text-decoration:none;">
+      ← Volver al listado
+    </a>
+    <h1 style="font-size:1.4rem;">
+      {{ 'Editar Orden' if order else 'Nueva Orden' }}
+    </h1>
+  </div>
+
+  <div class="card">
+    <form method="POST">
+
+      {# ── Cliente ──────────────────────────────────────────────────── #}
+      <div class="form-group">
+        <label for="client_name">Cliente *</label>
+        <input
+          type="text"
+          id="client_name"
+          name="client_name"
+          value="{{ order.client_name if order else '' }}"
+          required
+          placeholder="Nombre del cliente"
+        >
+      </div>
+
+      {# ── Conductor ────────────────────────────────────────────────── #}
+      <div class="form-group">
+        <label for="driver_name">Conductor *</label>
+        <input
+          type="text"
+          id="driver_name"
+          name="driver_name"
+          value="{{ order.driver_name if order else '' }}"
+          required
+          placeholder="Nombre del conductor"
+        >
+      </div>
+
+      {# ── Fecha ────────────────────────────────────────────────────── #}
+      <div class="form-group">
+        <label for="order_date">Fecha de la orden *</label>
+        <input
+          type="date"
+          id="order_date"
+          name="order_date"
+          value="{{ order.order_date if order else '' }}"
+          required
+        >
+      </div>
+
+      {# ── Estado (solo en edición) ──────────────────────────────────── #}
+      {% if order %}
+      <div class="form-group">
+        <label for="status">Estado *</label>
+        <select id="status" name="status" required>
+          {% set transitions = {
+            'Pendiente': ['Pendiente', 'En ruta', 'Cancelado'],
+            'En ruta':   ['En ruta', 'Entregado', 'Cancelado'],
+            'Entregado': ['Entregado'],
+            'Cancelado': ['Cancelado'],
+          } %}
+          {% for option in transitions.get(order.status, [order.status]) %}
+            <option value="{{ option }}" {{ 'selected' if option == order.status else '' }}>
+              {{ option }}
+            </option>
+          {% endfor %}
+        </select>
+        <small style="color:#666; margin-top:.3rem; display:block;">
+          Estado actual: <strong>{{ order.status }}</strong>
+        </small>
+      </div>
+      {% endif %}
+
+      {# ── Observaciones ────────────────────────────────────────────── #}
+      <div class="form-group">
+        <label for="observations">Observaciones</label>
+        <textarea
+          id="observations"
+          name="observations"
+          placeholder="Opcional — instrucciones especiales, dirección, etc."
+        >{{ order.observations if order and order.observations else '' }}</textarea>
+      </div>
+
+      {# ── Acciones del formulario ───────────────────────────────────── #}
+      <div style="display:flex; gap:.75rem; margin-top:1.5rem;">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Guardar cambios' if order else 'Crear orden' }}
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-warning">
+          Cancelar
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  {# ── Metadata (solo en edición) ───────────────────────────────────── #}
+  {% if order %}
+  <div style="margin-top:1rem; color:#888; font-size:.82rem; padding: 0 .25rem;">
+    <span>ID: {{ order.id }}</span> ·
+    <span>Creado: {{ order.created_at[:10] }}</span> ·
+    <span>Actualizado: {{ order.updated_at[:10] }}</span>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
